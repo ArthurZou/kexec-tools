@@ -56,6 +56,8 @@ void arch_usage(void)
 		"     --elf64-core-headers      Prepare core headers in ELF64 format\n"
 		"     --pass-memmap-cmdline     Pass memory map via command line in kexec on panic case\n"
 		"     --noefi                   Disable efi support\n"
+		"     --reset-vga-type=<type>   Attempt to reset a specific type of vga device,\n"
+		"                               currently only accept qemu-std-vga\n"
 		);
 }
 
@@ -68,6 +70,7 @@ struct arch_options_t arch_options = {
 	.core_header_type = CORE_TYPE_UNDEF,
 	.pass_memmap_cmdline = 0,
 	.noefi = 0,
+	.reset_vga_type = DEFAULT_VGA,
 };
 
 int arch_process_options(int argc, char **argv)
@@ -143,6 +146,15 @@ int arch_process_options(int argc, char **argv)
 		case OPT_NOEFI:
 			arch_options.noefi = 1;
 			break;
+		case OPT_RESET_VGA_TYPE:
+			if (strcmp(optarg, "qemu-std-vga") == 0) {
+				arch_options.reset_vga_type = QEMU_STD_VGA;
+				arch_options.reset_vga = 1;
+			} else {
+				fprintf(stderr, "Unsupported reset_vga_type\n");
+				return -1;
+			}
+			break;
 		}
 	}
 	/* Reset getopt for the next pass; called in other source modules */
@@ -205,4 +217,7 @@ void arch_update_purgatory(struct kexec_info *info)
 	}
 	elf_rel_set_symbol(&info->rhdr, "panic_kernel",
 		&panic_kernel, sizeof(panic_kernel));
+	elf_rel_set_symbol(&info->rhdr, "reset_vga_type",
+		&arch_options.reset_vga_type,
+		sizeof(arch_options.reset_vga_type));
 }

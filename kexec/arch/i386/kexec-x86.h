@@ -9,6 +9,11 @@ enum coretype {
 	CORE_TYPE_ELF64 = 2
 };
 
+enum vga_type {
+	DEFAULT_VGA  = 0,
+	QEMU_STD_VGA = 1,
+};
+
 extern unsigned char compat_x86_64[];
 extern uint32_t compat_x86_64_size, compat_x86_64_entry32;
 
@@ -52,6 +57,7 @@ struct arch_options_t {
 	enum coretype	core_header_type;
 	uint8_t  	pass_memmap_cmdline;
 	uint8_t		noefi;
+	enum vga_type	reset_vga_type;
 };
 
 int multiboot_x86_probe(const char *buf, off_t len);
